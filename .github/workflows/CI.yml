@@ -1,0 +1,45 @@
+name: Build ffmpeg-core lite
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-core:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Cache build
+        uses: actions/cache@v4
+        with:
+          path: build-cache-st
+          key: build-cache-st-lite-v1-${{ hashFiles('Dockerfile', 'build/*') }}
+          restore-keys: |
+            build-cache-st-lite-v1-
+      - name: Build ffmpeg-core (single-thread, LGPL)
+        run: |
+          docker buildx build \
+            --progress=plain \
+            --build-arg EXTRA_CFLAGS="-O3 -msimd128" \
+            --build-arg EXTRA_LDFLAGS="" \
+            --build-arg FFMPEG_ST=yes \
+            --build-arg FFMPEG_MT="" \
+            --cache-from=type=local,src=build-cache-st \
+            --cache-to=type=local,dest=build-cache-st,mode=max \
+            -o ./packages/core \
+            .
+      - name: Report sizes
+        run: |
+          ls -la packages/core/dist/esm
+          echo "wasm gzip: $(gzip -9 -c packages/core/dist/esm/ffmpeg-core.wasm | wc -c) bytes"
+          cat packages/core/dist/BUILD_CONFIG.txt
+      - name: Upload core
+        uses: actions/upload-artifact@v4
+        with:
+          name: ffmpeg-core-lite
+          path: packages/core/dist/*
