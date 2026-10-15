@@ -16,7 +16,7 @@ Build reducido de [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm) (v12.
 | Demuxers | `concat`, `mpegts`, `mp3` |
 | Muxers | `mp4` |
 | Parsers | `h264`, `aac`, `mpegaudio` |
-| Decoders | `aac`, `mp3`, `mp3float` |
+| Decoders | `aac`, `h264` (solo para analizar el stream: el video se copia), `mp3`, `mp3float` |
 | Encoders | `aac` |
 | BSFs | `aac_adtstoasc`, `extract_extradata`, `null` |
 | Filtros | `amix`, `aresample`, `aformat`, `anull`, `abuffer`, `abuffersink`, `null`, `buffer`, `buffersink` |

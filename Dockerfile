@@ -44,7 +44,10 @@ ADD https://github.com/FFmpeg/FFmpeg.git#$FFMPEG_VERSION /src
 # por uno lo que usa el comando de arriba:
 #   - concat/mpegts: los segmentos .ts, unidos con el concat demuxer
 #   - mp3: la música de fondo
-#   - parsers h264/aac: sacan los parámetros del stream sin decodificar video
+#   - parsers h264/aac + decoder h264: el video NO se decodifica al convertir
+#     (-c:v copy), pero sin el decoder el análisis del stream no obtiene las
+#     dimensiones ("unspecified size") y el muxer mp4 no puede escribir el
+#     header. Se usa solo para leer los primeros frames.
 #   - extract_extradata: SPS/PPS del H.264 para el avcC del MP4
 #   - aac (dec/enc) + amix/aresample/aformat: la mezcla de audio
 #   - mp4: la salida
@@ -57,7 +60,7 @@ RUN bash -x /src/build.sh \
       --enable-demuxer=concat,mpegts,mp3 \
       --enable-muxer=mp4 \
       --enable-parser=h264,aac,mpegaudio \
-      --enable-decoder=aac,mp3,mp3float \
+      --enable-decoder=aac,h264,mp3,mp3float \
       --enable-encoder=aac \
       --enable-bsf=aac_adtstoasc,extract_extradata,null \
       --enable-filter=amix,aresample,aformat,anull,abuffer,abuffersink,null,buffer,buffersink
